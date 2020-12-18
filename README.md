@@ -1,4 +1,4 @@
-# flutter-SDK
+# TheTellerCheckout (Flutter package)
 Flutter package for calling the TheTeller Checkout [Android & IOS]
 
 ## Getting Started
@@ -74,8 +74,7 @@ Flutter package for calling the TheTeller Checkout [Android & IOS]
     description	| true	| string	| Text to be displayed as a short transaction narration.|
     amount	| true	| double	| Amount to charge.|
     currency	| true	| string	| Currency to charge customer in. Defaults to GHS.|
-    paumentMethod	| false	| string	| Choose between card or mobile money payment.
-    e.g card, momo, both.|
+    paumentMethod	| false	| string	| Choose between card or mobile money payment. e.g card, momo, both.|
     customerEmail	| true	| string	| Email of the customer.|
     callback	| true if useWebview = false	| void Functon (Map<String, dynamic>)	| Called when transaction is completed (success/Failed).|
 
