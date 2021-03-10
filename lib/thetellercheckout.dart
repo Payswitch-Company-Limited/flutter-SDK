@@ -25,6 +25,7 @@ String defaultcurrency = "GHS";
 class TheTellerCheckout {
   final String _liveEndPoint = "https://checkout.theteller.net/initiate";
   final String _testEndPoint = "https://test.theteller.net/checkout/initiate";
+  var dialog;
 
   /// Returns [value] plus 1.
   int addOne(int value) => value + 1;
@@ -54,7 +55,7 @@ class TheTellerCheckout {
     if (useWebview != null) useWebView = useWebview;
   }
 
-  void initializeCheckout(
+  Future<dynamic> initializeCheckout(
     BuildContext context, {
     @required String transactionID,
     @required double amount,
@@ -82,11 +83,19 @@ class TheTellerCheckout {
       if (data["status"] != "success")
         callback(data);
       else if (useWebView)
-        await __launchWebView2(context, data["checkout_url"], callback);
+        dialog =
+            await __launchWebView2(context, data["checkout_url"], callback);
       else
-        await __launchWebView(data["checkout_url"]);
+        dialog = await __launchWebView(data["checkout_url"]);
     } else
       throw Exception(res.body);
+  }
+
+  void close() {
+    if (!useWebView && dialog != null) {
+      dialog.close();
+      dialog = null;
+    }
   }
 
   String minorUnit(double amount) {
@@ -107,30 +116,32 @@ class TheTellerCheckout {
         body: convert.jsonEncode(payload));
   }
 
-  // void _checkTransactionStatus(String id, Function callback) async {
-  //   http.Response res = await http.get(
-  //       "https://prod.theteller.net/v1.1/users/transactions/$id/status",
-  //       headers: {
-  //         "Merchant-Id": merchantId,
-  //         "Content-Type": "application/json",
-  //         "Accept": "application/json",
-  //         "Cache-Control": "no-cache"
-  //       });
-  //   if (res.statusCode >= 200 && res.statusCode <= 299) {
-  //     Map<String, dynamic> data = convert.jsonDecode(res.body);
-  //     if (data["status"] != "pending")
-  //       callback(data);
-  //     else {
-  //       print(data);
-  //       _checkTransactionStatus(id, callback);
-  //     }
-  //   }
-  // }
+  void checkTransactionStatus(
+      String id, Function(Map<String, dynamic> data) callback) async {
+    http.Response res = await http.get(
+        production
+            ? "https://prod.theteller.net/v1.1/users/transactions/$id/status"
+            : "https://test.theteller.net/v1.1/users/transactions/$id/status",
+        headers: {
+          "Merchant-Id": merchantId,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Cache-Control": "no-cache"
+        });
+    if (res.statusCode >= 200 && res.statusCode <= 299) {
+      Map<String, dynamic> data = convert.jsonDecode(res.body);
+      if (data["status"] != "pending")
+        callback(data);
+      else {
+        print(data);
+      }
+    }
+  }
 
   Future __launchWebView2(BuildContext context, String url,
       void Function(Map<String, dynamic> payload) callback) async {
     if (Platform.isAndroid) {
-      showDialog(
+      return await showDialog(
           context: context,
           builder: (c) => CustomWebView(
                 title: dialogtitle,
@@ -139,7 +150,7 @@ class TheTellerCheckout {
                 watch: redirect,
               ));
     } else {
-      showCupertinoModalPopup(
+      return await showCupertinoModalPopup(
           context: context,
           builder: (c) => CustomWebView(
                 url: url,
@@ -157,7 +168,7 @@ class TheTellerCheckout {
     }
   }
 
-  Future<ChromeSafariBrowser> __launchWebView(String url) async {
+  Future __launchWebView(String url) async {
     final ChromeSafariBrowser browser = CheckoutView();
     await browser.open(
         url: url,
