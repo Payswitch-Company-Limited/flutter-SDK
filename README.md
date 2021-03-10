@@ -46,7 +46,7 @@ Flutter package for calling the TheTeller Checkout [Android & IOS]
     redirect_url	| true	| String	| URL to redirect to when transaction is completed.|
     apiProdKey	| true	| String	| Your merchant API key provided when your accout is profiled to go live.|
     apiTestKey	| true	| String	| Your merchant API key provided when you create an account.|
-    apiuser	| true	| string	| Your merchant API Username provided when you create an account.|
+    apiuser	| true	| String	| Your merchant API Username provided when you create an account.|
     useWebview	| false	| bool default (true)	| set to false to use Chrome Custom Tabs on Android / SFSafariViewController on iOS. You will not receive callback response .|
     isProduction	| false	| bool default (false)	| default to false. When false your Test API key will be used.|
     dialogTitle | false | String default(Checkout) | Title of the checkout View|
@@ -56,7 +56,7 @@ Flutter package for calling the TheTeller Checkout [Android & IOS]
 
     ```dart
         TheTellerCheckout checkout = TheTellerCheckout();
-        const dialog  = checkout.initializeCheckout(context,
+        checkout.initializeCheckout(context,
             transactionID: "233243243444",
             amount: 20.3, 
             description: "Test Transaction for flutter package",
