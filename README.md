@@ -56,7 +56,7 @@ Flutter package for calling the TheTeller Checkout [Android & IOS]
 
     ```dart
         TheTellerCheckout checkout = TheTellerCheckout();
-        const dialog  = checkout.initializeCheckout(context,
+        checkout.initializeCheckout(context,
             transactionID: "233243243444",
             amount: 20.3, 
             description: "Test Transaction for flutter package",
@@ -84,7 +84,7 @@ Flutter package for calling the TheTeller Checkout [Android & IOS]
     When you initialize the package with useWebview set to false, your can maually close the checkout by do
 
     ```dart
-        dialog.close() // this will dismiss Chrome Custom Tabs on Android / SFSafariViewController on iOS 
+        checkout.close() // this will dismiss Chrome Custom Tabs on Android / SFSafariViewController on iOS 
     ```
 
     When useWebview is set to true, you can do this after receiving callback response
