@@ -1,12 +1,12 @@
 library thetellercheckout;
 
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:thetellercheckout/inappwebview.dart';
 import 'package:thetellercheckout/loader.dart';
 import 'package:thetellercheckout/webview.dart';
@@ -26,6 +26,13 @@ class TheTellerCheckout {
   final String _liveEndPoint = "https://checkout.theteller.net/initiate";
   final String _testEndPoint = "https://test.theteller.net/checkout/initiate";
   var dialog;
+  final ioc = new HttpClient();
+  http.Client _inner;
+
+  TheTellerCheckout() {
+    ioc.badCertificateCallback = (cert, String host, int port) => true;
+    _inner = new IOClient(ioc);
+  }
 
   /// Returns [value] plus 1.
   int addOne(int value) => value + 1;
@@ -105,7 +112,8 @@ class TheTellerCheckout {
   }
 
   Future<http.Response> talkToServer(Map<String, dynamic> payload) async {
-    return await http.post(production ? this._liveEndPoint : this._testEndPoint,
+    return await _inner.post(
+        production ? this._liveEndPoint : this._testEndPoint,
         headers: {
           "Authorization": "Basic " +
               convert.base64Encode(convert.utf8.encode(
@@ -118,7 +126,7 @@ class TheTellerCheckout {
 
   void checkTransactionStatus(
       String id, Function(Map<String, dynamic> data) callback) async {
-    http.Response res = await http.get(
+    http.Response res = await _inner.get(
         production
             ? "https://prod.theteller.net/v1.1/users/transactions/$id/status"
             : "https://test.theteller.net/v1.1/users/transactions/$id/status",
